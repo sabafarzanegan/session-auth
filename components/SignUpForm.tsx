@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import GoogleLoginBtn from "./GoogleLoginBtn";
 import GithubLoginBtn from "./GithubLoginBtn";
+import { registerHandle } from "@/app/auth/action/formaction";
 
 function SignUpForm() {
   const form = useForm<z.infer<typeof signupFormSchema>>({
@@ -18,8 +19,9 @@ function SignUpForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof signupFormSchema>) {
+  async function onSubmit(values: z.infer<typeof signupFormSchema>) {
     console.log(values);
+    registerHandle(values);
   }
 
   return (

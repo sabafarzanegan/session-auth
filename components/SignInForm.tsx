@@ -18,7 +18,7 @@ function SignInForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof signinFormSchema>) {
+  async function onSubmit(values: z.infer<typeof signinFormSchema>) {
     console.log(values);
   }
 
