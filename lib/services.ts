@@ -36,6 +36,7 @@ export const createUserSession = async (
   setCookie(sessionId, cookies);
 };
 
+// add sessionId to cookie
 function setCookie(sessionId: string, cookies: Pick<Cookies, "set">) {
   cookies.set(COOKIE_SESSION_KEY, sessionId, {
     secure: true,
