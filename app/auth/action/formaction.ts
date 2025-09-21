@@ -6,7 +6,9 @@ import {
   generateSalt,
   hashPasswordHandle,
 } from "@/lib/services";
+import { userRedis } from "@/lib/types";
 import { signupFormSchema } from "@/lib/zod-schema";
+import { redisClient } from "@/redis/redis";
 import { cookies } from "next/headers";
 import z from "zod";
 
@@ -50,3 +52,22 @@ export async function registerHandle(
     console.log(error);
   }
 }
+
+export const getUserFromDb = async (session_id: string) => {
+  try {
+    const userInRedis: userRedis = await redisClient.get(
+      `session:${session_id}`
+    );
+    console.log(userInRedis);
+
+    if (!userInRedis) return null;
+    const userInDb = await prisma.user.findFirst({
+      where: {
+        id: userInRedis.data.id,
+      },
+    });
+    return userInDb;
+  } catch (error) {
+    console.log(error);
+  }
+};

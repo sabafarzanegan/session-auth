@@ -17,3 +17,19 @@ export type Cookies = {
   get: (key: string) => { name: string; value: string } | undefined;
   delete: (key: string) => void;
 };
+
+export type userRedis = {
+  success: boolean;
+  data: { id: number; role: string };
+} | null;
+
+export type User = {
+  createdAt: Date;
+  email: string;
+  name: string | null;
+  id: number;
+  password: string;
+  role: "Admin" | "User";
+  salt: string;
+  updatedAt: Date;
+};

@@ -1,5 +1,3 @@
-import Image from "next/image";
-import Link from "next/link";
 function layout({ children }: { children: React.ReactNode }) {
   return (
     <div className=" mt-20 ">

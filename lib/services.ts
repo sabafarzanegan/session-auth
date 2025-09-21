@@ -45,3 +45,21 @@ function setCookie(sessionId: string, cookies: Pick<Cookies, "set">) {
     expires: Date.now() + SESSION_EXPIRATION_SECONDS * 1000,
   });
 }
+
+export const getUserFromSession = async (cookie: Pick<Cookies, "get">) => {
+  const sessionId = cookie.get(COOKIE_SESSION_KEY)?.value;
+  console.log("SessionId", sessionId);
+
+  if (!sessionId) return null;
+
+  return await getUserById(sessionId);
+};
+// get user from redis by sessionId
+export const getUserById = async (sessionId: string) => {
+  const redisUser = await redisClient.get(`session:${sessionId}`);
+  console.log("redisUser", redisUser);
+
+  const { success, data: user } = sessionSchema.safeParse(redisUser);
+
+  return success ? user : null;
+};

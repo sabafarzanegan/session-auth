@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 // specify routes
 const privateRoutes = ["/"];
 const adminRoute = ["/admin"];
+const authRoutes = ["/auth/sign-in", "/auth/register"];
 
 // create middleware function
 
@@ -21,6 +22,9 @@ export async function middlewareAuth(request: NextRequest) {
 
   if (!sessionId && adminRoute.includes(path)) {
     return NextResponse.redirect(new URL("/auth/sign-in", request.url));
+  }
+  if (sessionId && authRoutes.includes(path)) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();
