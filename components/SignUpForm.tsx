@@ -9,11 +9,16 @@ import z from "zod";
 import GoogleLoginBtn from "./GoogleLoginBtn";
 import GithubLoginBtn from "./GithubLoginBtn";
 import { registerHandle } from "@/app/auth/action/formaction";
+import { toast } from "sonner";
+import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 function SignUpForm() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof signupFormSchema>>({
     resolver: zodResolver(signupFormSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
     },
@@ -21,13 +26,37 @@ function SignUpForm() {
 
   async function onSubmit(values: z.infer<typeof signupFormSchema>) {
     console.log(values);
-    registerHandle(values);
+    try {
+      const res = await registerHandle(values);
+      if (!res.success) {
+        return toast.error(res.message);
+      }
+      toast.success(res.message);
+      router.push("/");
+    } catch (error) {}
   }
 
   return (
     <div className="w-[300px]">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="Enter name"
+                    {...field}
+                    className="h-[40px]"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="email"
@@ -62,8 +91,11 @@ function SignUpForm() {
               </FormItem>
             )}
           />
-          <Button className="w-full h-[40px]" type="submit">
-            Submit
+          <Button
+            disabled={form.formState.isSubmitting}
+            className="w-full h-[40px]"
+            type="submit">
+            {form.formState.isSubmitting ? "loading..." : "submit"}
           </Button>
         </form>
       </Form>

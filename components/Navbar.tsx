@@ -2,9 +2,10 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { getUserFromDb } from "@/app/auth/action/formaction";
+import { useEffect, useState, useTransition } from "react";
+import { getUserFromDb, logOut } from "@/app/auth/action/formaction";
 import { User } from "@/lib/types";
+import { Loader2 } from "lucide-react";
 
 const navLinkItems = [
   { id: 1, name: "Home", link: "/" },
@@ -12,6 +13,7 @@ const navLinkItems = [
 ];
 
 function Navbar({ session_id }: { session_id: string | undefined }) {
+  const [isPending, startTransition] = useTransition();
   const [user, setUser] = useState<User | null | undefined>(null);
   const pathname = usePathname();
   useEffect(() => {
@@ -47,7 +49,20 @@ function Navbar({ session_id }: { session_id: string | undefined }) {
       </nav>
       {/* auth links */}
       {user ? (
-        <p>{user.email}</p>
+        // <p>{user.email}</p>
+        <Button
+          onClick={() => {
+            startTransition(async () => {
+              await logOut();
+            });
+          }}
+          variant="destructive">
+          {isPending ? (
+            <Loader2 className="animate-spin duration-200" />
+          ) : (
+            "logout"
+          )}
+        </Button>
       ) : (
         <div
           className="flex items-center 

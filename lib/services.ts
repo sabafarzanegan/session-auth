@@ -63,3 +63,12 @@ export const getUserById = async (sessionId: string) => {
 
   return success ? user : null;
 };
+
+export const removeUserFromSession = async (
+  cookie: Pick<Cookies, "delete" | "get">
+) => {
+  const sessionId = cookie.get(COOKIE_SESSION_KEY)?.value;
+  if (!sessionId) return null;
+  await redisClient.del(`session:${sessionId}`);
+  cookie.delete(COOKIE_SESSION_KEY);
+};

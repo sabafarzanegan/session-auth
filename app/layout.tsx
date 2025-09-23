@@ -3,9 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { cookies } from "next/headers";
-import { getUserFromSession } from "@/lib/services";
-import { redisClient } from "@/redis/redis";
-import prisma from "@/lib/prisma";
+
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +37,7 @@ export default async function RootLayout({
         <Navbar session_id={Session_id} />
         <main>{children}</main>
         {/* footer */}
+        <Toaster richColors closeButton />
       </body>
     </html>
   );

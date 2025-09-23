@@ -5,25 +5,31 @@ import {
   createUserSession,
   generateSalt,
   hashPasswordHandle,
+  removeUserFromSession,
 } from "@/lib/services";
 import { userRedis } from "@/lib/types";
 import { signupFormSchema } from "@/lib/zod-schema";
 import { redisClient } from "@/redis/redis";
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import z from "zod";
 
 export async function registerHandle(
   formData: z.infer<typeof signupFormSchema>
 ) {
   const { success, data } = signupFormSchema.safeParse(formData);
-  if (!success) return "Unable to create account";
+  if (!success) return { success: false, message: "Unable to create account" };
+
   //   checking if a user exist in db with this email
   const existingUser = await prisma.user.findFirst({
     where: {
       email: formData.email,
     },
   });
-  if (existingUser != null) return "Account already exists for this email";
+  if (existingUser != null)
+    return { success: false, message: "Account already exists for this email" };
+
   try {
     // generate salt for session
     const salt = generateSalt();
@@ -37,19 +43,22 @@ export async function registerHandle(
         email: formData.email,
         password: hashedPassword,
         salt: salt,
-        name: "",
+        name: formData.name,
       },
       select: {
         id: true,
         role: true,
       },
     });
-    if (user == null) return "Unable to create account";
+    if (user == null)
+      return { success: false, message: "Unable to create account" };
 
     // create session for user based on id and role of user
     await createUserSession(user, await cookies());
+
+    return { success: true, message: "register successfully!" };
   } catch (error) {
-    console.log(error);
+    return { success: false, message: "Unable to create account" };
   }
 }
 
@@ -70,4 +79,10 @@ export const getUserFromDb = async (session_id: string) => {
   } catch (error) {
     console.log(error);
   }
+};
+
+export const logOut = async () => {
+  await removeUserFromSession(await cookies());
+  revalidatePath("/");
+  redirect("/auth/sign-in");
 };
