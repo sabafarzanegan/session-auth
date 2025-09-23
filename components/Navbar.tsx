@@ -54,11 +54,12 @@ function Navbar({ session_id }: { session_id: string | undefined }) {
           onClick={() => {
             startTransition(async () => {
               await logOut();
+              window.location.reload();
             });
           }}
           variant="destructive">
           {isPending ? (
-            <Loader2 className="animate-spin duration-200" />
+            <Loader2 className="animate-spin duration-200 block" />
           ) : (
             "logout"
           )}

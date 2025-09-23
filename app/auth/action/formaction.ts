@@ -2,13 +2,14 @@
 
 import prisma from "@/lib/prisma";
 import {
+  comparePassword,
   createUserSession,
   generateSalt,
   hashPasswordHandle,
   removeUserFromSession,
 } from "@/lib/services";
 import { userRedis } from "@/lib/types";
-import { signupFormSchema } from "@/lib/zod-schema";
+import { signinFormSchema, signupFormSchema } from "@/lib/zod-schema";
 import { redisClient } from "@/redis/redis";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
@@ -55,12 +56,37 @@ export async function registerHandle(
 
     // create session for user based on id and role of user
     await createUserSession(user, await cookies());
-
+    revalidatePath("/");
     return { success: true, message: "register successfully!" };
   } catch (error) {
     return { success: false, message: "Unable to create account" };
   }
 }
+
+export const loginHandler = async (
+  formData: z.infer<typeof signinFormSchema>
+) => {
+  const { success } = signinFormSchema.safeParse(formData);
+  if (!success) return { success: false, message: "Unable to create account" };
+
+  const user = await prisma.user.findFirst({
+    where: {
+      email: formData.email,
+    },
+  });
+  if (!user) return { success: false, message: "you do not register yet" };
+
+  const isCorrectPassword = await comparePassword({
+    hashedPassword: user.password,
+    password: formData.password,
+    salt: user.salt,
+  });
+  if (!isCorrectPassword)
+    return { success: false, message: "password is not correct" };
+
+  await createUserSession(user, await cookies());
+  return { success: true, message: "logged in successfully" };
+};
 
 export const getUserFromDb = async (session_id: string) => {
   try {
@@ -83,6 +109,4 @@ export const getUserFromDb = async (session_id: string) => {
 
 export const logOut = async () => {
   await removeUserFromSession(await cookies());
-  revalidatePath("/");
-  redirect("/auth/sign-in");
 };

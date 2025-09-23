@@ -8,6 +8,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import GoogleLoginBtn from "./GoogleLoginBtn";
 import GithubLoginBtn from "./GithubLoginBtn";
+import { loginHandler } from "@/app/auth/action/formaction";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 function SignInForm() {
   const form = useForm<z.infer<typeof signinFormSchema>>({
@@ -20,6 +23,14 @@ function SignInForm() {
 
   async function onSubmit(values: z.infer<typeof signinFormSchema>) {
     console.log(values);
+    try {
+      const res = await loginHandler(values);
+      if (!res.success) {
+        return toast.error(res.message);
+      }
+      toast.success(res.message);
+      window.location.reload();
+    } catch (error) {}
   }
 
   return (
@@ -60,8 +71,15 @@ function SignInForm() {
               </FormItem>
             )}
           />
-          <Button className="w-full h-[40px]" type="submit">
-            Submit
+          <Button
+            disabled={form.formState.isSubmitting}
+            className="w-full h-[40px]"
+            type="submit">
+            {form.formState.isSubmitting ? (
+              <Loader2 className="animate-spin duration-200" />
+            ) : (
+              "login"
+            )}
           </Button>
         </form>
       </Form>

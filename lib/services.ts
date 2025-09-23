@@ -72,3 +72,19 @@ export const removeUserFromSession = async (
   await redisClient.del(`session:${sessionId}`);
   cookie.delete(COOKIE_SESSION_KEY);
 };
+
+export const comparePassword = async ({
+  hashedPassword,
+  password,
+  salt,
+}: {
+  hashedPassword: string;
+  password: string;
+  salt: string;
+}) => {
+  const hashedInputPassword = await hashPasswordHandle(password, salt);
+  return crypto.timingSafeEqual(
+    Buffer.from(hashedInputPassword, "hex"),
+    Buffer.from(hashedPassword, "hex")
+  );
+};

@@ -12,6 +12,7 @@ import { registerHandle } from "@/app/auth/action/formaction";
 import { toast } from "sonner";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 function SignUpForm() {
   const router = useRouter();
@@ -95,7 +96,11 @@ function SignUpForm() {
             disabled={form.formState.isSubmitting}
             className="w-full h-[40px]"
             type="submit">
-            {form.formState.isSubmitting ? "loading..." : "submit"}
+            {form.formState.isSubmitting ? (
+              <Loader2 className="animate-spin duration-200" />
+            ) : (
+              "submit"
+            )}
           </Button>
         </form>
       </Form>
